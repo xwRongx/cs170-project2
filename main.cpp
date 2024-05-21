@@ -23,9 +23,9 @@ float evaluationFunction(set<int> s){ //i'm assuming this will eventually take i
 // };
 
 set<int> forwardSelectionAlgorithm(set<int> s) {
-    set<int> globalHighest;
+    set<int> globalHighest; //we use set bc no duplicates and auto sorted
     set<int> localHighest;
-    map<set<int>, float> evaluatedSets;
+    map<set<int>, float> evaluatedSets; //this map uses a set<int> (subset of features) to find a float (accuracy %)
 
     int n = s.size();
 
@@ -34,21 +34,22 @@ set<int> forwardSelectionAlgorithm(set<int> s) {
     for(int i = 1; i <= n; i++) {
         localHighest.clear();
         localAccuracy = 0;
-        for(auto feature : s) {
-            set<int> evaluationSet = globalHighest;
-            evaluationSet.insert(feature);
+        for(auto feature : s) { //auto keyword- smartly fills in type based on the variable given (in this case s is int)
+            set<int> evaluationSet = globalHighest; //best subset so far
+            evaluationSet.insert(feature); //best + 1 new feature
 
-            if (evaluatedSets.find(evaluationSet) == evaluatedSets.end()) {
+            if (evaluatedSets.find(evaluationSet) == evaluatedSets.end()) { //?
                 float accuracy = evaluationFunction(evaluationSet);
-                evaluatedSets[evaluationSet] = accuracy;
-
+                evaluatedSets[evaluationSet] = accuracy; //putting accuracy corresponding to set
+                
+                //prints:
                 cout << "\tUsing features { ";
                 for (int feat : evaluationSet) {
                     cout << feat << " ";
                 }
                 cout << "} accuracy is " << accuracy << "%" << endl;
 
-                if (localHighest.empty() || accuracy > localAccuracy) {
+                if (localHighest.empty() || accuracy > localAccuracy) { //update localAccuracy
                     localHighest = evaluationSet;
                     localAccuracy = accuracy;
                 }
@@ -56,21 +57,28 @@ set<int> forwardSelectionAlgorithm(set<int> s) {
         }
         
         if (localHighest.empty()) break;
-
+        
+        //prints:
         cout << "Feature set { ";
         for (int feature : localHighest) {
             cout << feature << " ";
         }
         cout << "} was best, accuracy is " << localAccuracy << "%" << endl;
         
-        globalAccuracy = evaluationFunction(globalHighest);
-        if (!globalHighest.empty() && localAccuracy < globalAccuracy) {
-            cout << "Warning: Accuracy decreased" << endl;
-            break;
-        } else if(localAccuracy > globalAccuracy) {
+        if(globalHighest.empty()){ //set to local values
             globalHighest = localHighest;
             globalAccuracy = localAccuracy;
+        }else{
+            globalAccuracy = evaluationFunction(globalHighest);
+            if (localAccuracy < globalAccuracy) { //accuracy decreased
+                cout << "Warning: Accuracy decreased" << endl;
+                break;
+            } else if(localAccuracy > globalAccuracy) { //accuracy increased
+                globalHighest = localHighest;
+                globalAccuracy = localAccuracy;
+            } //nothing if accuracy stayed same
         }
+        
     }
     return globalHighest;
 };
