@@ -3,6 +3,8 @@
 #include <set>
 #include <algorithm>
 #include <time.h>
+#include <map>
+#include <ctime>
 using namespace std;
 
 
@@ -11,118 +13,124 @@ float evaluationFunction(set<int> s){ //i'm assuming this will eventually take i
       return  static_cast <float> (rand()) / ( static_cast <float> (RAND_MAX/(100-0))); //return random number betwwen 0 and 100
 };
 
-set<int> forwardSelectionAlgorithm(set<int> s)
-{
+// float evaluationFunction(set<int> s){ //i'm assuming this will eventually take in a vector of set??
+//     int sum = 0;
+//     for (int val : s) 
+//     {
+//         sum += val;
+//     }
+//     return static_cast<float>(sum);
+// };
+
+set<int> forwardSelectionAlgorithm(set<int> s) {
     set<int> globalHighest;
     set<int> localHighest;
+    map<set<int>, float> evaluatedSets;
 
     int n = s.size();
 
     float globalAccuracy = 0;
-    float localAcurracy = 0;
-    for(int i = 1; i <= n; i++)
-    {
+    float localAccuracy = 0;
+    for(int i = 1; i <= n; i++) {
         localHighest.clear();
-        for(int j = 1; j <= n; j++)
-        {
+        localAccuracy = 0;
+        for(auto feature : s) {
             set<int> evaluationSet = globalHighest;
-            evaluationSet.insert(j);
+            evaluationSet.insert(feature);
 
-            float accuracy = evaluationFunction(evaluationSet);
-            cout << "\tUsing features { ";
-            for (int feature : evaluationSet) 
-            {
-                cout << feature << " ";
+            if (evaluatedSets.find(evaluationSet) == evaluatedSets.end()) {
+                float accuracy = evaluationFunction(evaluationSet);
+                evaluatedSets[evaluationSet] = accuracy;
+
+                cout << "\tUsing features { ";
+                for (int feat : evaluationSet) {
+                    cout << feat << " ";
+                }
+                cout << "} accuracy is " << accuracy << "%" << endl;
+
+                if (localHighest.empty() || accuracy > localAccuracy) {
+                    localHighest = evaluationSet;
+                    localAccuracy = accuracy;
+                }
             }
-            cout << "} accuracy is " << accuracy << "%" << endl;
-
-            if (localHighest.empty() || accuracy > localAcurracy) 
-            {
-                localHighest = evaluationSet;
-                localAcurracy = accuracy;
-            }        
         }
+        
+        if (localHighest.empty()) break;
+
         cout << "Feature set { ";
-        for (int feature : localHighest) 
-        {
+        for (int feature : localHighest) {
             cout << feature << " ";
         }
-
-
-        cout << "} was best, accuracy is " << localAcurracy << endl;
+        cout << "} was best, accuracy is " << localAccuracy << "%" << endl;
         
         globalAccuracy = evaluationFunction(globalHighest);
-        if (!globalHighest.empty() && localAcurracy < globalAccuracy) 
-        {
+        if (!globalHighest.empty() && localAccuracy < globalAccuracy) {
             cout << "Warning: Accuracy decreased" << endl;
-        }
-        else if(localAcurracy > globalAccuracy)
-        {
+            break;
+        } else if(localAccuracy > globalAccuracy) {
             globalHighest = localHighest;
-            globalAccuracy = localAcurracy;
+            globalAccuracy = localAccuracy;
         }
     }
     return globalHighest;
 };
 
-set<int> backwardsSelectionAlgorithm(set<int> s)
-{
-    set<int> globalHighest;
-    // set<int> localHighest;
+set<int> backwardsSelectionAlgorithm(set<int> s) {
+    set<int> globalHighest = s;
+    set<int> localHighest;
+    map<set<int>, float> evaluatedSets;
 
-    // int n = s.size();
+    float globalAccuracy = evaluationFunction(globalHighest);
+    float localAccuracy;
 
-    // float globalAccuracy = 0;
-    // float localAcurracy = 0;
-    // globalHighest = s;
-    // globalAccuracy = evaluationFunction(globalHighest);
-    // for(int i = 1; i <= n; i++)
-    // {
-    //     localHighest.clear();
-    //     for(int j = 1; j <= n; j++)
-    //     {
-    //         set<int> evaluationSet = globalHighest;
-    //         evaluationSet.insert(j);
+    int n = s.size();
 
-    //         float accuracy = evaluationFunction(evaluationSet);
-    //         cout << "\tUsing features { ";
-    //         for (int feature : evaluationSet) 
-    //         {
-    //             cout << feature << " ";
-    //         }
-    //         cout << "} accuracy is " << accuracy << "%" << endl;
+    for(int i = 1; i <= n; i++) {
+        localHighest = globalHighest;
+        localAccuracy = 0;
 
-    //         if (localHighest.empty() || accuracy > localAcurracy) 
-    //         {
-    //             localHighest = evaluationSet;
-    //             localAcurracy = accuracy;
-    //         }        
-    //     }
-    //     cout << "Feature set { ";
-    //     for (int feature : localHighest) 
-    //     {
-    //         cout << feature << " ";
-    //     }
+        for(int j = 1; j <=n; j++) {
+            set<int> evaluationSet = globalHighest;
+            evaluationSet.erase(j);
 
+            if (evaluatedSets.find(evaluationSet) == evaluatedSets.end()) {
+                float accuracy = evaluationFunction(evaluationSet);
+                evaluatedSets[evaluationSet] = accuracy;
 
-    //     cout << "} was best, accuracy is " << localAcurracy << endl;
-        
-    //     globalAccuracy = evaluationFunction(globalHighest);
-    //     if (!globalHighest.empty() && localAcurracy < globalAccuracy) 
-    //     {
-    //         cout << "Warning: Accuracy decreased" << endl;
-    //     }
-    //     else if(localAcurracy > globalAccuracy)
-    //     {
-    //         globalHighest = localHighest;
-    //         globalAccuracy = localAcurracy;
-    //     }
-    // }
+                cout << "\tUsing features { ";
+                for (int feature : evaluationSet) {
+                    cout << feature << " ";
+                }
+                cout << "} accuracy is " << accuracy << "%" << endl;
+
+                if (evaluationSet.size() > 0 && (localAccuracy == 0 || accuracy > localAccuracy)) {
+                    localHighest = evaluationSet;
+                    localAccuracy = accuracy;
+                }
+            }
+        }
+
+        if (localHighest.empty()) break;
+
+        cout << "Feature set { ";
+        for (int feature : localHighest) {
+            cout << feature << " ";
+        }
+        cout << "} was best, accuracy is " << localAccuracy << "%" << endl;
+
+        if (localAccuracy < globalAccuracy) {
+            cout << "Warning: Accuracy decreased" << endl;
+            break;
+        } else {
+            globalHighest = localHighest;
+            globalAccuracy = localAccuracy;
+        }
+    }
     return globalHighest;
 };
 
 int main(){
-    srand(time(NULL));
+    srand(time(0));
     int choice = -1;
     while(choice !=0){
         cout << "Welcome to the Feature Selection Algorithm.\n";
@@ -148,10 +156,20 @@ int main(){
             case 1:
                 cout << "Using no features and \"random\" evaluation, I get an accuracy of " << evaluationFunction(bestFeatures) << endl;
                 bestFeatures = forwardSelectionAlgorithm(features);
+                cout << "The overall best feature selection is: " << endl;
+                 for (int feature : bestFeatures) {
+                cout << feature << " ";
+                }
+                cout << endl;
                 break;
             case 2:
                 cout << "Using no features and \"random\" evaluation, I get an accuracy of " << evaluationFunction(bestFeatures) << endl;
                 bestFeatures = backwardsSelectionAlgorithm(features);
+                cout << "The overall best feature selection is: " << endl;
+                for (int feature : bestFeatures) {
+                cout << feature << " ";
+                }
+                cout << endl;
                 break;
             default:
                 cout << "Invalid choice.\n";
