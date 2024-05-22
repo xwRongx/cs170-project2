@@ -1,8 +1,4 @@
 #include <iostream>
-#include "headers/Node.h"
-#include "headers/AlgGeneric.h"
-#include "headers/AlgForward.h"
-#include "headers/AlgBackward.h"
 using namespace std;
 
 int main(){
