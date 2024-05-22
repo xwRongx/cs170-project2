@@ -10,3 +10,6 @@ CMakeCache.txt
 CMakeFiles/
 */CMakeFiles/
 .cmake/
+/cmake-build-debug/.ninja_deps
+/cmake-build-debug/.ninja_log
+/cmake-build-debug/build.ninja
