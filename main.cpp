@@ -1,187 +1,214 @@
 #include <iostream>
 #include <set>
 #include <algorithm>
-#include <time.h>
-#include <map>
 #include <ctime>
+#include <map>
+
 using namespace std;
 
+// [[STUB]]
+float evaluationFunction(const set<int>& s) { // TODO: i'm assuming this will eventually take in a vector of set??
+    return static_cast <float> (rand()) /
+           (static_cast <float> (RAND_MAX / (100 - 0))); // return random number between 0 and 100
+};
 
+// Contains a mapping of [KEY: set] [VALUE: that set's accuracy]
+// INFO: This map uses a set<int> (subset of features) to find a float (accuracy %)
+// Initializes with only the "no features" set.
+map<set<int>, float> mapEvaluatedSets;
+
+/*
 float evaluationFunction(set<int> s){ //i'm assuming this will eventually take in a vector of set??
-    //stub function
-    return  static_cast <float> (rand()) / ( static_cast <float> (RAND_MAX/(100-0))); //return random number betwwen 0 and 100
-};
-
-// float evaluationFunction(set<int> s){ //i'm assuming this will eventually take in a vector of set??
-//     int sum = 0;
-//     for (int val : s)
-//     {
-//         sum += val;
-//     }
-//     return static_cast<float>(sum);
-// };
-
-set<int> forwardSelectionAlgorithm(set<int> s) {
-    set<int> globalHighest; //we use set bc no duplicates and auto sorted
-    set<int> localHighest;
-    map<set<int>, float> evaluatedSets; //this map uses a set<int> (subset of features) to find a float (accuracy %)
-
-    int n = s.size();
-
-    float globalAccuracy = 0;
-    float localAccuracy = 0;
-    for(int i = 1; i <= n; i++) {
-        localHighest.clear();
-        localAccuracy = 0;
-        for(auto feature : s) { //auto keyword- smartly fills in type based on the variable given (in this case s is int)
-            set<int> evaluationSet = globalHighest; //best subset so far
-            evaluationSet.insert(feature); //best + 1 new feature
-
-            if (evaluatedSets.find(evaluationSet) == evaluatedSets.end()) { //?
-                float accuracy = evaluationFunction(evaluationSet);
-                evaluatedSets[evaluationSet] = accuracy; //putting accuracy corresponding to set
-
-                //prints:
-                cout << "\tUsing features { ";
-                for (int feat : evaluationSet) {
-                    cout << feat << " ";
-                }
-                cout << "} accuracy is " << accuracy << "%" << endl;
-
-                if (localHighest.empty() || accuracy > localAccuracy) { //update localAccuracy
-                    localHighest = evaluationSet;
-                    localAccuracy = accuracy;
-                }
-            }
-        }
-
-        if (localHighest.empty()) break;
-
-        //prints:
-        cout << "Feature set { ";
-        for (int feature : localHighest) {
-            cout << feature << " ";
-        }
-        cout << "} was best, accuracy is " << localAccuracy << "%" << endl;
-
-        if(globalHighest.empty()){ //set to local values
-            globalHighest = localHighest;
-            globalAccuracy = localAccuracy;
-        }else{
-            globalAccuracy = evaluationFunction(globalHighest);
-            if (localAccuracy < globalAccuracy) { //accuracy decreased
-                cout << "Warning: Accuracy decreased" << endl;
-                break;
-            } else if(localAccuracy > globalAccuracy) { //accuracy increased
-                globalHighest = localHighest;
-                globalAccuracy = localAccuracy;
-            } //nothing if accuracy stayed same
-        }
-
+    int sum = 0;
+    for (int val : s)
+    {
+        sum += val;
     }
-    return globalHighest;
+    return static_cast<float>(sum);
 };
+ */
 
-set<int> backwardsSelectionAlgorithm(set<int> s) {
-    set<int> globalHighest = s;
-    set<int> localHighest;
-    map<set<int>, float> evaluatedSets;
+// Prints a set
+void printSet(const set<int>& s) {
+    if(s.empty()) {
+        cout << "{}";
+    } else {
+        cout << "{ ";
+        for (int feature: s) {
+            cout << feature << " ";
+        }
+        cout << "}";
+    }
 
-    float globalAccuracy = evaluationFunction(globalHighest);
-    float localAccuracy;
+}
 
-    int n = s.size();
+set<int> forwardSelectionAlgorithm(const set<int>& s) {
+    if (s.empty()) {return {};}
 
-    for(int i = 1; i <= n; i++) {
-        localHighest = globalHighest;
-        localAccuracy = 0;
+    // INFO: we use set because sets cannot have duplicates and is auto sorted
+    set<int> setGlobalHighest = {};
+    set<int> setLocalHighest;
 
-        for(int j = 1; j <=n; j++) {
-            set<int> evaluationSet = globalHighest;
-            evaluationSet.erase(j);
+    // LOOP 1 : Iterate for N number of features
+    for (int i = 1; i <= s.size(); i++) {
+        setLocalHighest.clear();
 
-            if (evaluatedSets.find(evaluationSet) == evaluatedSets.end()) {
-                float accuracy = evaluationFunction(evaluationSet);
-                evaluatedSets[evaluationSet] = accuracy;
+        // LOOP 2 : Iterate for N number of features
+        for (auto feature: s) { // INFO: auto keyword - smartly fills in type based on the variable given (in this case s is int)
+            /*
+             *  Current set in the iteration.
+             *      -> contains the highest accuracy subset so far +1 feature
+             */
+            set<int> set = setGlobalHighest;
+            set.insert(feature);
 
-                cout << "\tUsing features { ";
-                for (int feature : evaluationSet) {
-                    cout << feature << " ";
-                }
-                cout << "} accuracy is " << accuracy << "%" << endl;
+            if (mapEvaluatedSets.find(set) == mapEvaluatedSets.end()) { // The set "set" does not exist in the mapping "mapEvaluatedSets". We haven't mapped it yet.
+                float a = evaluationFunction(set);
+                mapEvaluatedSets[set] = a; // Create a new entry in the map
 
-                if (evaluationSet.size() > 0 && (localAccuracy == 0 || accuracy > localAccuracy)) {
-                    localHighest = evaluationSet;
-                    localAccuracy = accuracy;
+                // PRINT: a single set with its a -----------
+                cout << "\tUsing features ";
+                printSet(set);
+                cout << " accuracy is " << a << "%\n";
+                // ------------------------------------------
+
+                /*
+                 *  First iteration - assigns setLocalHighest to first set found
+                 *  All other iterations - if accuracy is greater than the current best accuracy, make that accuracy the new highest
+                 */
+                if (setLocalHighest.empty() || a > mapEvaluatedSets[setLocalHighest]) {
+                    setLocalHighest = set;
                 }
             }
         }
 
-        if (localHighest.empty()) break;
+        // PRINT: selection of best set (each "step") in the algorithm -----------
+        cout << "Feature set ";
+        printSet(setLocalHighest);
+        cout << " was best, accuracy is " << mapEvaluatedSets[setLocalHighest] << "%\n";
+        // -----------------------------------------------------------------------
 
-        cout << "Feature set { ";
-        for (int feature : localHighest) {
-            cout << feature << " ";
-        }
-        cout << "} was best, accuracy is " << localAccuracy << "%" << endl;
-
-        if (localAccuracy < globalAccuracy) {
-            cout << "Warning: Accuracy decreased" << endl;
+        // Can't climb any further. setLocalHighest has a smaller accuracy AKA All the sets from the operation results have a smaller accuracy.
+        if (mapEvaluatedSets[setLocalHighest] < mapEvaluatedSets[setGlobalHighest]) {
             break;
-        } else {
-            globalHighest = localHighest;
-            globalAccuracy = localAccuracy;
         }
+
+        setGlobalHighest = setLocalHighest; // setLocalHighest has a larger accuracy. update setGlobalHighest.
     }
-    return globalHighest;
+    return setGlobalHighest;
 };
 
-int main(){
-    srand(time(0));
-    int choice = -1;
-    while(choice !=0){
-        cout << "Welcome to the Feature Selection Algorithm.\n";
-        cout << "Please enter the total number of features: ";
-        int numFeatures;
-        cin >> numFeatures;
+set<int> backwardsSelectionAlgorithm(const set<int>& s) {
+    if (s.empty()) {return {};}
 
-        set<int> features;
+    set<int> setGlobalHighest = s;
+    set<int> setLocalHighest;
 
-        for(int i = 1; i <= numFeatures; i++)
-        {
-            features.insert(i);
+    // LOOP 1
+    for (int i = 1; i <= s.size(); i++) {
+        setLocalHighest.clear();
+
+        // LOOP 2
+        for (int j = 1; j <= s.size(); j++) {
+            /*
+             *  Current set in the iteration.
+             *      -> contains the highest accuracy subset so far +1 feature
+             */
+            set<int> set = setGlobalHighest;
+            set.erase(j);
+
+            if (mapEvaluatedSets.find(set) == mapEvaluatedSets.end()) { // The set "set" does not exist in the mapping "mapEvaluatedSets". We haven't mapped it yet.
+                float a = evaluationFunction(set);
+                mapEvaluatedSets[set] = a; // Create a new entry in the map
+
+                // PRINT: a single set with its a -----------
+                cout << "\tUsing features ";
+                printSet(set);
+                cout << " accuracy is " << a << "%\n";
+                // ------------------------------------------
+
+                if (setLocalHighest.empty() || a > mapEvaluatedSets[setLocalHighest]) {
+                    setLocalHighest = set;
+                }
+            }
         }
-        cout << "Type the number of the algorithm you want to run.\n";
-        cout << "1. Forward Selection\n";
-        cout << "2. Backward Elimination\n";
-        cout << "0. to Exit\n";
+
+        // PRINT: selection of best set (each "step") in the algorithm -----------
+        cout << "Feature set ";
+        printSet(setLocalHighest);
+        cout << " was best, accuracy is " << mapEvaluatedSets[setLocalHighest] << "%\n";
+        // -----------------------------------------------------------------------
+
+        // Can't climb any further. setLocalHighest has a smaller accuracy AKA All the sets from the operation results have a smaller accuracy.
+        if (mapEvaluatedSets[setLocalHighest] < mapEvaluatedSets[setGlobalHighest]) {
+            break;
+        }
+
+        setGlobalHighest = setLocalHighest; // setLocalHighest has a larger accuracy. update setGlobalHighest.
+    }
+    return setGlobalHighest;
+};
+
+int main() {
+    srand(time(nullptr));
+    int choice = -1;
+
+    while (choice != 0) {
+        /*
+         *  USER INPUT : Number of features
+         */
+        cout << "Welcome to the Feature Selection Algorithm.\n"
+            << "Please enter the total number of features: ";
 
         cin >> choice;
-        set<int> bestFeatures;
+        set<int> setFeatures;
+
+        for (int i = 1; i <= choice; i++) {
+            setFeatures.insert(i);
+        }
+
+        /*
+         *  USER INPUT : Algorithm selection
+         */
+        cout << "Type the number of the algorithm you want to run.\n"
+            << "1. Forward Selection\n"
+            << "2. Backward Elimination\n"
+            << "0. to Exit\n";
+
+        cin >> choice;
+        set<int> answer;
 
         switch (choice) {
-            case 1:
-                cout << "Using no features and \"random\" evaluation, I get an accuracy of " << evaluationFunction(bestFeatures) << endl;
-                bestFeatures = forwardSelectionAlgorithm(features);
-                cout << "The overall best feature selection is: " << endl;
-                for (int feature : bestFeatures) {
-                    cout << feature << " ";
-                }
-                cout << endl;
+            case 1: // Forward Selection
+                mapEvaluatedSets = {{{}, evaluationFunction({})}}; // initialize map with root node
+
+                cout << "Root node: {}, Accuracy: "
+                     << mapEvaluatedSets[{}] << "%\n";
+
+                answer = forwardSelectionAlgorithm(setFeatures);
+
+                cout << "The overall best feature selection is: ";
+                printSet(answer);
+                cout << "\n";
                 break;
-            case 2:
-                cout << "Using no features and \"random\" evaluation, I get an accuracy of " << evaluationFunction(bestFeatures) << endl;
-                bestFeatures = backwardsSelectionAlgorithm(features);
-                cout << "The overall best feature selection is: " << endl;
-                for (int feature : bestFeatures) {
-                    cout << feature << " ";
-                }
-                cout << endl;
+
+            case 2: // Backward Elimination
+                mapEvaluatedSets = {{setFeatures, evaluationFunction(setFeatures)}}; // initialize map with root node
+
+                cout << "Root node: ";
+                printSet(setFeatures);
+                cout << ", Accuracy: " << mapEvaluatedSets[setFeatures] << "%\n";
+
+                answer = backwardsSelectionAlgorithm(setFeatures);
+
+                cout << "The overall best feature selection is: ";
+                printSet(answer);
+                cout << "\n";
                 break;
+
             default:
                 cout << "Invalid choice.\n";
                 break;
         }
     }
-
 }
