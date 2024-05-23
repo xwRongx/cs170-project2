@@ -1,3 +1,4 @@
+#include "../headers/Classifier.h"
 
 class Validator
 {
@@ -7,6 +8,6 @@ public:
     Validator(/* args */);
     ~Validator();
 
-    float evaluationFunction();
+    float evaluationFunction(vector<float>* subset, Classifier classifier, vector<vector<float>*>* dataset);
 };
 
