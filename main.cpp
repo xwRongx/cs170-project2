@@ -1,11 +1,79 @@
 #include <iostream>
+#include <fstream>
 #include <algorithm>
-#include <ctime>
+#include <time.h>
 #include <map>
 #include "headers/Validator.h"
 #include "headers/Instance.h"
-
+#include <ctime>
+#include <string>
+#include <iomanip>
+#include <cmath>
 using namespace std;
+
+
+vector<vector<float>*>* readDataset(const string& filename) { 
+    ifstream infile(filename); //opens file
+    if (!infile.is_open()) {//checks if files exists
+        cerr << "Error opening file: " << filename << endl;//will print error message if any issues occur
+        exit(1);
+    }
+    string line;//will hold value
+    auto* data = new vector<vector<float>*>; //creating a vector<float>* pointer
+    //auto* keyword is used to declare a pointer type implicitly, so vector<vector<float>*>* data <==> auto* data :)
+    int numFeatures = 0; // number of features excluding the first column
+    int numInstances = 0; //number of instances (total rows)
+
+    while (getline(infile, line)) { //will loop through file until empty
+        stringstream ss(line); //getting single values
+        auto* row = new vector<float>; //creating vector of type float to hold values
+        float value; //float value will be stored here and appended to row vector
+        numInstances++; //incrementing instance count
+        while (ss >> value) { //looping though single line of data each iteration
+            row->push_back(value); //pushing single float value until line is empty
+            //cout << fixed << setprecision(8) << value << " ";
+            //cout << scientific << value << " ";
+        }
+        //cout << numInstances << endl;
+        //cout << endl;
+        numFeatures = row->size(); //setting feature count
+        data->push_back(row);//pushing row vector into data == 1 complete instance being pushed into data vector
+    }
+    numFeatures = numFeatures -1; //excluding first column
+
+    infile.close(); //closing the file
+
+    //Normalizing the data (X – mean(X))/std(x)
+    for (auto* row : *data) { //looping through data rows, auto* row is a single row instance
+        float mean = 0.0; 
+        int n = row->size(); //total size of a row i.e 11 for small-test-dataset.txt
+        for(int i = 1; i < n;++i ){ //adding up all values in for single row (excluding the row[0] since its the class label)
+            mean += row->at(i);
+        }
+        mean = mean /(n-1); //calculating the mean for row
+        
+        float stddev = 0.0;
+        for(int i = 1; i < n;++i){ //adding up values for stddev (row-val - mean)^2
+            stddev += pow(row->at(i) - mean, 2);
+        }
+        stddev = sqrt(stddev / (n-1)); //stddev for row
+        
+        for(int i = 1; i < n;++i){ //X = (X – mean(X))/std(x) putting it all together
+            row->at(i) = (row->at(i) - mean) / stddev;
+            //cout << fixed << setprecision(8) << row->at(i) << " ";
+        }
+    }
+    /* 
+    //checking if values were properly updated after normalizing
+    for (auto* row : *data){
+        for(int i = 0; i < row->size();++i){ //X = (X – mean(X))/std(x)
+        cout << fixed << setprecision(8) << row->at(i) << " ";
+        }
+        cout << endl;
+    }*/
+    cout << "This dataset has " << numFeatures << " features (not including the class attribute), with " << numInstances << " instances." << endl;
+    return data;
+}
 
 auto validator = new Validator();
 auto classifier = new Classifier();
@@ -158,8 +226,12 @@ int main() {
         /*
          *  USER INPUT : Number of features
          */
-        cout << "Welcome to the Feature Selection Algorithm.\n"
-            << "Please enter the total number of features: ";
+        cout << "Welcome to the Feature Selection Algorithm.\n";
+        cout << "Type in the name of the file to test : ";
+        cin >> filename;
+        cout << "Please enter the total number of features: ";
+        int numFeatures;
+        cin >> numFeatures;
 
         cin >> choice;
         vector<float> features;
@@ -175,6 +247,7 @@ int main() {
             << "1. Forward Selection\n"
             << "2. Backward Elimination\n"
             << "0. to Exit\n";
+        auto* dataset = readDataset(filename); //make sure file name is in same folder
 
         cin >> choice;
         vector<float> answer;
@@ -184,6 +257,7 @@ int main() {
                 answer = forwardSelectionAlgorithm(features);
 
                 cout << "The overall best feature selection is: ";
+
                 printFeatures(answer);
                 cout << "\n";
                 break;
