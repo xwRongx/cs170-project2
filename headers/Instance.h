@@ -8,10 +8,10 @@
 class Instance {
 public:
     float classLabel;
-    std::vector<float> *features;
+    std::vector<float> features;
     Instance() {
         this->classLabel = 0;
-        this->features = new std::vector<float>;
+        this->features = {};
     }
 };
 

@@ -4,7 +4,7 @@
 
 
 // [STUB]
-float Validator::evaluationFunction(vector<float>* subset, Classifier* classifier, map<Instance, float>* dataset){
+float Validator::evaluationFunction(vector<float> features, Classifier* classifier, map<Instance*, float>* dataset){
       //stub function 
       return  static_cast <float> (rand()) / ( static_cast <float> (RAND_MAX/(100-0))); //return random number betwwen 0 and 100
 }
