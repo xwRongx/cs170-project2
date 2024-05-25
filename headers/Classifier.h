@@ -2,6 +2,7 @@
 #include <map>
 #include <cmath>
 #include "Instance.h"
+#include <float.h>
 
 using namespace std;
 

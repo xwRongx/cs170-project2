@@ -15,7 +15,7 @@ float Classifier::test(Instance* testInstance){
     auto* closestInstance = new Instance();
     float closestInstanceSimilarity = FLT_MAX; //stores similarity value (calculated with euclidean) of the closest training instance
 
-    //go through dataset and find trainingInstance with highest similarity value
+    //go through dataset and find trainingInstance with the highest similarity value
     for(auto instance : *dataset){
         float euclideanDist = euclideanDistance(instance.first /*instance's Instance*/, testInstance);
         if(closestInstanceSimilarity < euclideanDist){ //if new highest similarity, update closestInstance
@@ -33,8 +33,8 @@ float Classifier::euclideanDistance(Instance* trainingInstance, Instance* testIn
     float similarity = 0.0;
 
     //euclidean dist equation: similarity = sqrt((a1-a2)^2 + (b1-b2)^2 + (c1-c2)^2 + (d1-d2)^2...))
-    for(int i = 0; i < trainingInstance->features->size();i++){
-        similarity += pow(trainingInstance->features->at(i) - testInstance->features->at(i),2);
+    for(int i = 0; i < trainingInstance->features.size();i++){
+        similarity += pow(trainingInstance->features.at(i) - testInstance->features.at(i),2);
     }
     similarity = sqrt(similarity);
 
