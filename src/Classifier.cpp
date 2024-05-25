@@ -4,41 +4,33 @@ Classifier::Classifier(){
     dataset = nullptr;
 }
 
-//getter
-vector<vector<float>*>* Classifier::getDataset(){
-    if(dataset == nullptr){
-        return nullptr;
-    }else{
-        return dataset;
-    }
-}
-
 //classifier functions
-void Classifier::train(vector<vector<float>*>* incomingDataSet){ //kind of a setter
+void Classifier::train(map<Instance, float>* incomingDataSet){ //kind of a setter
     //class label for each instance is provided along w feature vector
     dataset = incomingDataSet;
 }
 
 //NN classifier
-float Classifier::test(vector<float>* testInstance){
+float Classifier::test(Instance* testInstance){
     //compute distance of testInstance to all training points (in dataset)
-    vector<float>* closestInstance = nullptr;
-    float closestInstanceSimilarity; //stores similarity value (calculated with euclidean) of closest training instance
+    Instance closestInstance = {-1, {}};
+    float closestInstanceSimilarity; //stores similarity value (calculated with euclidean) of the closest training instance
 
-    for(vector<float>* trainingInstance:*dataset){
-        int euclideanDist = euclideanDistance(trainingInstance, testInstance);
+    for(auto data : *dataset){
+        float euclideanDist = euclideanDistance(data.first /*data's Instance*/, *testInstance);
         if(closestInstanceSimilarity < euclideanDist){
             closestInstanceSimilarity = euclideanDist;
-            closestInstance = trainingInstance;
+            closestInstance = data.first;
         }
     }
-    return closestInstance->at(0); //return class label of nearest training point
+    return closestInstance.classLabel; //return class label of the nearest training point
 }
 
 //helper functions
 //take in training and test instance, return float similarity value
-float Classifier::euclideanDistance(vector<float>* trainingInstance, vector<float>* testInstance){
+float Classifier::euclideanDistance(Instance trainingInstance, Instance testInstance){
     //euclidean distance for n features, where n = size of inner vector
-
     return 0;
 }
+
+Classifier::~Classifier() = default;
