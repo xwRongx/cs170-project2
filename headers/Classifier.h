@@ -1,5 +1,6 @@
 #include <vector>
 #include <map>
+#include <cmath>
 #include "Instance.h"
 
 using namespace std;
@@ -21,5 +22,5 @@ public:
     float test(Instance* testInstance); //based on training data, return predicted class of testInstance
 
     //helper function
-    float euclideanDistance(Instance trainingInstance, Instance testInstance);
+    float euclideanDistance(Instance* trainingInstance, Instance* testInstance);
 };
