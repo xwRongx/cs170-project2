@@ -101,16 +101,16 @@ vector<float> backwardsSelectionAlgorithm(vector<float> s) {
     Instance* setLocalHighest = rootNode;
 
     // LOOP 1 : Iterate for N number of s
-    for (auto i = s.begin(); i < s.end(); i++) {
+    for (auto i = s.begin(); i != s.end(); i++) {
 
         // LOOP 2 : Iterate for N number of s
-        for (auto j = s.begin(); j < s.end(); j++) { // INFO: auto keyword - smartly fills in type based on the variable given (in this case s is int)
+        for (int j = 0; j < s.size(); j++) { // INFO: auto keyword - smartly fills in type based on the variable given (in this case s is int)
             /*
              *  Current instance in the iteration.
              *      -> contains the highest accuracy subset so far -1 feature
              */
             auto* instance = new Instance(*setGlobalHighest);
-            instance->features.erase(j);
+            instance->features.erase(remove(instance->features.begin(), instance->features.end(), j), instance->features.end());
 
             if (classifier->dataset->find(instance) == classifier->dataset->end()) { // The instance "instance" does not exist in the mapping "dataset". We haven't mapped it yet.
                 float a = validator->evaluationFunction(instance->features, classifier, classifier->dataset);
