@@ -221,24 +221,17 @@ int main() {
     int choice = -1;
 
     while (choice != 0) {
+        string filename;
         classifier->dataset = new map<Instance*, float>();  // initialize map with root node
 
         /*
-         *  USER INPUT : Number of features
+         *  USER INPUT : File name
          */
         cout << "Welcome to the Feature Selection Algorithm.\n";
-        cout << "Type in the name of the file to test : ";
+        cout << "Type in the name of the file to test: ";
         cin >> filename;
-        cout << "Please enter the total number of features: ";
-        int numFeatures;
-        cin >> numFeatures;
 
-        cin >> choice;
-        vector<float> features;
-
-        for (int i = 1; i <= choice; i++) {
-            features.push_back(i);
-        }
+        auto* dataset = readDataset(filename); //make sure file name is in same folder
 
         /*
          *  USER INPUT : Algorithm selection
@@ -247,14 +240,13 @@ int main() {
             << "1. Forward Selection\n"
             << "2. Backward Elimination\n"
             << "0. to Exit\n";
-        auto* dataset = readDataset(filename); //make sure file name is in same folder
 
         cin >> choice;
         vector<float> answer;
 
         switch (choice) {
             case 1: // Forward Selection
-                answer = forwardSelectionAlgorithm(features);
+                answer = forwardSelectionAlgorithm(*(*dataset->begin()));
 
                 cout << "The overall best feature selection is: ";
 
@@ -263,7 +255,7 @@ int main() {
                 break;
 
             case 2: // Backward Elimination
-                answer = backwardsSelectionAlgorithm(features);
+                answer = backwardsSelectionAlgorithm(*(*dataset->begin()));
 
                 cout << "The overall best feature selection is: ";
                 printFeatures(answer);
