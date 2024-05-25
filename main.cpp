@@ -8,6 +8,8 @@
 #include <ctime>
 #include <string>
 #include <iomanip>
+#include <sstream>
+#include <vector>
 #include <cmath>
 using namespace std;
 
