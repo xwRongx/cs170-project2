@@ -13,7 +13,7 @@ void Classifier::train(map<Instance, float>* incomingDataSet){ //kind of a sette
 //NN classifier
 float Classifier::test(Instance* testInstance){
     //compute distance of testInstance to all training points (in dataset)
-    Instance closestInstance = {-1, {}};
+    auto* closestInstance = new Instance();
     float closestInstanceSimilarity; //stores similarity value (calculated with euclidean) of the closest training instance
 
     for(auto data : *dataset){

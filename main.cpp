@@ -27,12 +27,12 @@ vector<float>* forwardSelectionAlgorithm(vector<float> *s) {
     if (s->empty()) {return {};}
 
     // INFO: we use set because sets cannot have duplicates and is auto sorted
-    Instance setGlobalHighest = {-1, {}};
-    Instance setLocalHighest = {-1, {}};
+    auto* setGlobalHighest = new Instance();
+    Instance* setLocalHighest;
 
     // LOOP 1 : Iterate for N number of s
     for (auto i = s->begin(); i < s->end(); i++) {
-        setLocalHighest.features->clear();
+        setLocalHighest = new Instance();
 
         // LOOP 2 : Iterate for N number of s
         for (auto feature: *s) { // INFO: auto keyword - smartly fills in type based on the variable given (in this case s is int)
@@ -40,16 +40,16 @@ vector<float>* forwardSelectionAlgorithm(vector<float> *s) {
              *  Current set in the iteration.
              *      -> contains the highest accuracy subset so far +1 feature
              */
-            Instance set = setGlobalHighest;
-            set.features->push_back(feature);
+            Instance* set = setGlobalHighest;
+            set->features->push_back(feature);
 
-            if (classifier->dataset->find(set) == classifier->dataset->end()) { // The set "set" does not exist in the mapping "dataset". We haven't mapped it yet.
-                float a = validator->evaluationFunction(set.features, classifier, classifier->dataset);
-                classifier->dataset->insert({set, a}); // Create a new entry in the map
+            if (classifier->dataset->find(*set) == classifier->dataset->end()) { // The set "set" does not exist in the mapping "dataset". We haven't mapped it yet.
+                float a = validator->evaluationFunction(set->features, classifier, classifier->dataset);
+                classifier->dataset->insert({*set, a}); // Create a new entry in the map
 
                 // PRINT: a single set with its a -----------
-                cout << "\tUsing s ";
-                printFeatures(set.features);
+                cout << "\tUsing features ";
+                printFeatures(set->features);
                 cout << " accuracy is " << a << "%\n";
                 // ------------------------------------------
 
@@ -57,7 +57,7 @@ vector<float>* forwardSelectionAlgorithm(vector<float> *s) {
                  *  First iteration - assigns setLocalHighest to first set found
                  *  All other iterations - if accuracy is greater than the current best accuracy, make that accuracy the new highest
                  */
-                if (setLocalHighest.features->empty() || a > classifier->dataset->at(setLocalHighest)) {
+                if (setLocalHighest->features == nullptr || a > classifier->dataset->at(*setLocalHighest)) {
                     setLocalHighest = set;
                 }
             }
@@ -65,29 +65,29 @@ vector<float>* forwardSelectionAlgorithm(vector<float> *s) {
 
         // PRINT: selection of best set (each "step") in the algorithm -----------
         cout << "Feature set ";
-        printFeatures(setLocalHighest.features);
-        cout << " was best, accuracy is " << classifier->dataset->at(setLocalHighest) << "%\n";
+        printFeatures(setLocalHighest->features);
+        cout << " was best, accuracy is " << classifier->dataset->at(*setLocalHighest) << "%\n";
         // -----------------------------------------------------------------------
 
         // Can't climb any further. setLocalHighest has a smaller accuracy AKA All the sets from the operation results have a smaller accuracy.
-        if (classifier->dataset->at(setLocalHighest) < classifier->dataset->at(setGlobalHighest)) {
+        if (classifier->dataset->at(*setLocalHighest) < classifier->dataset->at(*setGlobalHighest)) {
             break;
         }
 
         setGlobalHighest = setLocalHighest; // setLocalHighest has a larger accuracy. update setGlobalHighest.
     }
-    return setGlobalHighest.features;
+    return setGlobalHighest->features;
 };
 
 vector<float>* backwardsSelectionAlgorithm(vector<float> *s) {
     if (s->empty()) {return {};}
 
-    Instance setGlobalHighest = {-1, s};
-    Instance setLocalHighest = {-1, {}};
+    auto* setGlobalHighest = new Instance();
+    Instance* setLocalHighest;
 
     // LOOP 1 : Iterate for N number of s
     for (auto i = s->begin(); i < s->end(); i++) {
-        setLocalHighest.features->clear();
+        setLocalHighest->features = {};
 
         // LOOP 2 : Iterate for N number of s
         for (auto j = s->begin(); j < s->end(); j++) { // INFO: auto keyword - smartly fills in type based on the variable given (in this case s is int)
@@ -95,16 +95,16 @@ vector<float>* backwardsSelectionAlgorithm(vector<float> *s) {
              *  Current set in the iteration.
              *      -> contains the highest accuracy subset so far -1 feature
              */
-            Instance set = setGlobalHighest;
-            set.features->erase(j);
+            Instance* set = setGlobalHighest;
+            set->features->erase(j);
 
-            if (classifier->dataset->find(set) == classifier->dataset->end()) { // The set "set" does not exist in the mapping "dataset". We haven't mapped it yet.
-                float a = validator->evaluationFunction(set.features, classifier, classifier->dataset);
-                classifier->dataset->insert({set, a}); // Create a new entry in the map
+            if (classifier->dataset->find(*set) == classifier->dataset->end()) { // The set "set" does not exist in the mapping "dataset". We haven't mapped it yet.
+                float a = validator->evaluationFunction(set->features, classifier, classifier->dataset);
+                classifier->dataset->insert({*set, a}); // Create a new entry in the map
 
                 // PRINT: a single set with its a -----------
-                cout << "\tUsing s ";
-                printFeatures(set.features);
+                cout << "\tUsing features ";
+                printFeatures(set->features);
                 cout << " accuracy is " << a << "%\n";
                 // ------------------------------------------
 
@@ -112,7 +112,7 @@ vector<float>* backwardsSelectionAlgorithm(vector<float> *s) {
                  *  First iteration - assigns setLocalHighest to first set found
                  *  All other iterations - if accuracy is greater than the current best accuracy, make that accuracy the new highest
                  */
-                if (setLocalHighest.features->empty() || a > classifier->dataset->at(setLocalHighest)) {
+                if (setLocalHighest->features == nullptr || a > classifier->dataset->at(*setLocalHighest)) {
                     setLocalHighest = set;
                 }
             }
@@ -120,18 +120,18 @@ vector<float>* backwardsSelectionAlgorithm(vector<float> *s) {
 
         // PRINT: selection of best set (each "step") in the algorithm -----------
         cout << "Feature set ";
-        printFeatures(setLocalHighest.features);
-        cout << " was best, accuracy is " << classifier->dataset->at(setLocalHighest) << "%\n";
+        printFeatures(setLocalHighest->features);
+        cout << " was best, accuracy is " << classifier->dataset->at(*setLocalHighest) << "%\n";
         // -----------------------------------------------------------------------
 
         // Can't climb any further. setLocalHighest has a smaller accuracy AKA All the sets from the operation results have a smaller accuracy.
-        if (classifier->dataset->at(setLocalHighest) < classifier->dataset->at(setGlobalHighest)) {
+        if (classifier->dataset->at(*setLocalHighest) < classifier->dataset->at(*setGlobalHighest)) {
             break;
         }
 
         setGlobalHighest = setLocalHighest; // setLocalHighest has a larger accuracy. update setGlobalHighest.
     }
-    return setGlobalHighest.features;
+    return setGlobalHighest->features;
 };
 
 int main() {
@@ -164,14 +164,20 @@ int main() {
 
         cin >> choice;
         vector<float>* answer;
+        Instance rootNode;
 
         switch (choice) {
             case 1: // Forward Selection
+                rootNode.features = new vector<float>;
+
                 // add root node to dataset
-                classifier->dataset->insert({{-1, {}}, validator->evaluationFunction({}, classifier, classifier->dataset)});
+                classifier->dataset->insert({
+                    rootNode,
+                    validator->evaluationFunction(rootNode.features, classifier, classifier->dataset)
+                });
 
                 cout << "Root node: {}, Accuracy: "
-                     << classifier->dataset->at({-1, {}}) << "%\n";
+                     << classifier->dataset->at(rootNode) << "%\n";
 
                 answer = forwardSelectionAlgorithm(features);
 
@@ -181,12 +187,17 @@ int main() {
                 break;
 
             case 2: // Backward Elimination
+                rootNode.features = features;
+
                 // add root node to dataset
-                classifier->dataset->insert({{-1, features}, validator->evaluationFunction(features, classifier, classifier->dataset)});
+                classifier->dataset->insert({
+                    rootNode,
+                    validator->evaluationFunction(features, classifier, classifier->dataset)
+                });
 
                 cout << "Root node: ";
                 printFeatures(features);
-                cout << ", Accuracy: " << classifier->dataset->at({-1, features}) << "%\n";
+                cout << ", Accuracy: " << classifier->dataset->at(rootNode) << "%\n";
 
                 answer = backwardsSelectionAlgorithm(features);
 
