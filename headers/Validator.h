@@ -1,3 +1,6 @@
+#include <map>
+#include "../headers/Classifier.h"
+#include "Instance.h"
 
 class Validator
 {
@@ -7,6 +10,6 @@ public:
     Validator(/* args */);
     ~Validator();
 
-    float evaluationFunction();
+    float evaluationFunction(vector<float> features, Classifier* classifier, map<Instance*, float>* dataset);
 };
 
