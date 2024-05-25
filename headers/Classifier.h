@@ -1,5 +1,6 @@
 #include <vector>
 #include <map>
+#include <cmath>
 #include "Instance.h"
 
 using namespace std;
