@@ -3,12 +3,28 @@
 #include <map>
 
 
-// [STUB]
 float Validator::evaluationFunction(vector<float> features, Classifier* classifier, map<Instance*, float>* dataset){
-      //stub function 
-      return  static_cast <float> (rand()) / ( static_cast <float> (RAND_MAX/(100-0))); //return random number betwwen 0 and 100
+      float counter = 0;
+      int n = dataset->size();
+      //two ways this goes: we use the features, have some for loop that makes new insatcnes, thne we classify
+      //or clasisifer sgeemnets automtically, then we chilll
+
+      for (const auto& instancePair : *dataset) {
+            Instance* testInstance = instancePair.first;
+            map<Instance*, float> trainSet(*dataset);
+            trainSet.erase(testInstance);
+
+            classifier->train(&trainSet);
+
+            float prediction = classifier->test(testInstance);
+
+           if(prediction == testInstance->classLabel) counter++;
+        }
+      return counter/dataset->size();
 }
 
 Validator::~Validator() = default;
 
 Validator::Validator() = default;
+
+

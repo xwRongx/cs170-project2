@@ -4,7 +4,10 @@
 
 #ifndef LAB2_FEATURE_SELECTION_INSTANCE_H
 #define LAB2_FEATURE_SELECTION_INSTANCE_H
-
+/*
+instance is a single line/row in the data.txt files
+1 instance holds a class label and features for 1 row
+*/
 class Instance {
 public:
     float classLabel;
