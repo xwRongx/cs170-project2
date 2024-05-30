@@ -3,24 +3,26 @@
 #include <map>
 
 
-float Validator::evaluationFunction(vector<float> features, Classifier* classifier, map<Instance*, float>* dataset){
+float Validator::evaluationFunction(vector<int>* features, Classifier* classifier, vector<Instance*> dataset){
       float counter = 0;
-      int n = dataset->size();
-      //two ways this goes: we use the features, have some for loop that makes new insatcnes, thne we classify
+      int n = dataset.size();
+      //two ways this goes: we use the featureValues, have some for loop that makes new insatcnes, thne we classify
       //or clasisifer sgeemnets automtically, then we chilll
 
-      for (const auto& instancePair : *dataset) {
-            Instance* testInstance = instancePair.first;
-            map<Instance*, float> trainSet(*dataset);
-            trainSet.erase(testInstance);
+      // TODO: incorporate features into this. only the features passed through should be used for evaluation across all instances in the dataset
 
-            classifier->train(&trainSet);
+      for (int i = 0; i < dataset.size(); i++) {
+            vector<Instance*> trainSet(dataset); // Copy dataset to new training set
+            Instance* testInstance = trainSet[i]; // Save the current testing instance
+            trainSet.pop_back(); // Remove the testInstance from the training set
+
+            classifier->train(trainSet); // Train off the training set
 
             float prediction = classifier->test(testInstance);
 
            if(prediction == testInstance->classLabel) counter++;
         }
-      return counter/dataset->size();
+      return counter/dataset.size();
 }
 
 Validator::~Validator() = default;
