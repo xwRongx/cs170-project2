@@ -14,9 +14,9 @@ float Classifier::test(Instance* testInstance){
 
     //go through dataset and find trainingInstance with the highest similarity value
     for(auto instance : dataset){
-        float euclideanDist = euclideanDistance(instance /*instance's Instance*/, testInstance);
-        if(closestInstanceSimilarity < euclideanDist){ //if new highest similarity, update closestInstance
-            closestInstanceSimilarity = euclideanDist;
+        float similarity = euclideanDistance(instance /*instance's Instance*/, testInstance);
+        if(closestInstanceSimilarity > similarity){ //if new highest similarity, update closestInstance
+            closestInstanceSimilarity = similarity;
             closestInstance = instance;
         }
     }
@@ -26,6 +26,8 @@ float Classifier::test(Instance* testInstance){
 //helper functions
 //take in training and test instance, return float similarity value
 float Classifier::euclideanDistance(Instance* trainingInstance, Instance* testInstance){
+    // TODO: incorporate features into this. only the features passed through should be used for evaluation across all instances in the dataset
+
     //euclidean distance for n featureValues, where n = size of inner vector
     float similarity = 0.0;
 

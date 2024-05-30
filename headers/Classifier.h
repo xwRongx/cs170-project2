@@ -9,12 +9,11 @@ using namespace std;
 class Classifier
 {
 private:
+    vector<Instance*> dataset; //keeps all training instances
 
 public:
     Classifier(/* args */);
     ~Classifier();
-
-    vector<Instance*> dataset; //keeps all training instances
 
     //classifier functions
     void train(vector<Instance*> incomingDataSet); //kind of a setter

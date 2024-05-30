@@ -63,12 +63,12 @@ vector<Instance*> readDataset(const string& filename) {
         mean = mean /(n-1); //calculating the mean for row
         
         float stddev = 0.0;
-        for(int i = 1; i < n;++i){ //adding up values for stddev (row-val - mean)^2
+        for(int i = 0; i < n;++i){ //adding up values for stddev (row-val - mean)^2
             stddev += pow(row->featureValues.at(i) - mean, 2);
         }
         stddev = sqrt(stddev / (n-1)); //stddev for row
         
-        for(int i = 1; i < n;++i){ //X = (X – mean(X))/std(x) putting it all together
+        for(int i = 0; i < n;++i){ //X = (X – mean(X))/std(x) putting it all together
             row->featureValues.at(i) = (row->featureValues.at(i) - mean) / stddev;
             //cout << fixed << setprecision(8) << row->at(i) << " ";
         }
@@ -87,6 +87,7 @@ vector<Instance*> readDataset(const string& filename) {
 
 auto validator = new Validator();
 auto classifier = new Classifier();
+vector<Instance*> dataset;
 
 // Prints a single featureValues
 void printFeatures(const vector<int> features) {
@@ -106,7 +107,7 @@ vector<int> forwardSelectionAlgorithm(int featureCount) {
     // add root node to memoizedFeatures
     memoizedFeatures->insert({
         rootNode,
-        validator->evaluationFunction(rootNode, classifier, classifier->dataset)
+        validator->evaluationFunction(rootNode, classifier, dataset)
     });
 
     cout << "Root node: {}, Accuracy: "
@@ -128,7 +129,7 @@ vector<int> forwardSelectionAlgorithm(int featureCount) {
             featureList->push_back(j);
 
             if (memoizedFeatures->find(featureList) == memoizedFeatures->end()) { // The featureList "featureList" does not exist in the mapping "dataset". We haven't mapped it yet.
-                float a = validator->evaluationFunction(featureList, classifier, classifier->dataset);
+                float a = validator->evaluationFunction(featureList, classifier, dataset);
                 memoizedFeatures->insert({featureList, a}); // Create a new entry in the map
 
                 // PRINT: a single featureList with its a -----------
@@ -238,7 +239,7 @@ int main() {
         if(filename == "d")
             filename = "../small-test-dataset.txt";
 
-        classifier->dataset = readDataset(filename); //make sure file name is in same folder
+        dataset = readDataset(filename); //make sure file name is in same folder
 
         /*
          *  USER INPUT : Algorithm selection
@@ -253,7 +254,7 @@ int main() {
 
         switch (choice) {
             case 1: // Forward Selection
-                answer = forwardSelectionAlgorithm(classifier->dataset[0]->featureValues.size());
+                answer = forwardSelectionAlgorithm(dataset[0]->featureValues.size());
 
                 cout << "The overall best feature selection is: ";
 
