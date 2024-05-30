@@ -107,7 +107,7 @@ vector<int> forwardSelectionAlgorithm(int featureCount) {
     // add root node to memoizedFeatures
     memoizedFeatures->insert({
         rootNode,
-        validator->evaluationFunction(rootNode, classifier, dataset)
+        validator->evaluationFunction(*rootNode, classifier, dataset)
     });
 
     cout << "Root node: {}, Accuracy: "
@@ -129,7 +129,7 @@ vector<int> forwardSelectionAlgorithm(int featureCount) {
             featureList->push_back(j);
 
             if (memoizedFeatures->find(featureList) == memoizedFeatures->end()) { // The featureList "featureList" does not exist in the mapping "dataset". We haven't mapped it yet.
-                float a = validator->evaluationFunction(featureList, classifier, dataset);
+                float a = validator->evaluationFunction(*featureList, classifier, dataset);
                 memoizedFeatures->insert({featureList, a}); // Create a new entry in the map
 
                 // PRINT: a single featureList with its a -----------

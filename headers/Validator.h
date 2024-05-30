@@ -10,6 +10,6 @@ public:
     Validator(/* args */);
     ~Validator();
 
-    float evaluationFunction(vector<int>* features, Classifier* classifier, vector<Instance*> dataset);
+    float evaluationFunction(vector<int> features, Classifier* classifier, vector<Instance*> dataset);
 };
 

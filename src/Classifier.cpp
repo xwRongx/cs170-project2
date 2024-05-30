@@ -8,13 +8,13 @@ void Classifier::train(vector<Instance*> incomingDataSet){ //kind of a setter
 }
 
 //NN classifier
-float Classifier::test(Instance* testInstance){
+float Classifier::test(vector<int> features, Instance* testInstance){
     auto* closestInstance = new Instance();
     float closestInstanceSimilarity = FLT_MAX; //stores similarity value (calculated with euclidean) of the closest training instance
 
     //go through dataset and find trainingInstance with the highest similarity value
     for(auto instance : dataset){
-        float similarity = euclideanDistance(instance /*instance's Instance*/, testInstance);
+        float similarity = euclideanDistance(features, instance /*instance's Instance*/, testInstance);
         if(closestInstanceSimilarity > similarity){ //if new highest similarity, update closestInstance
             closestInstanceSimilarity = similarity;
             closestInstance = instance;
@@ -25,15 +25,15 @@ float Classifier::test(Instance* testInstance){
 
 //helper functions
 //take in training and test instance, return float similarity value
-float Classifier::euclideanDistance(Instance* trainingInstance, Instance* testInstance){
+float Classifier::euclideanDistance(vector<int> features, Instance* trainingInstance, Instance* testInstance){
     // TODO: incorporate features into this. only the features passed through should be used for evaluation across all instances in the dataset
 
     //euclidean distance for n featureValues, where n = size of inner vector
     float similarity = 0.0;
 
     //euclidean dist equation: similarity = sqrt((a1-a2)^2 + (b1-b2)^2 + (c1-c2)^2 + (d1-d2)^2...))
-    for(int i = 0; i < trainingInstance->featureValues.size(); i++){
-        similarity += pow(trainingInstance->featureValues.at(i) - testInstance->featureValues.at(i), 2);
+    for(int i = 0; i < features.size(); i++){
+        similarity += pow(trainingInstance->featureValues.at(features[i]) - testInstance->featureValues.at(features[i]), 2);
     }
     similarity = sqrt(similarity);
 

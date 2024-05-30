@@ -17,8 +17,8 @@ public:
 
     //classifier functions
     void train(vector<Instance*> incomingDataSet); //kind of a setter
-    float test(Instance* testInstance); //based on training data, return predicted class of testInstance
+    float test(vector<int> features, Instance* testInstance); //based on training data, return predicted class of testInstance
 
     //helper function
-    float euclideanDistance(Instance* trainingInstance, Instance* testInstance);
+    float euclideanDistance(vector<int> features, Instance* trainingInstance, Instance* testInstance);
 };
