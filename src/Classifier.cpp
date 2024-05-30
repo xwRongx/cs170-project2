@@ -26,7 +26,7 @@ float Classifier::test(vector<int> features, Instance* testInstance){
 //helper functions
 //take in training and test instance, return float similarity value
 float Classifier::euclideanDistance(vector<int> features, Instance* trainingInstance, Instance* testInstance){
-    // TODO: incorporate features into this. only the features passed through should be used for evaluation across all instances in the dataset
+    // TODO: figure out if this value is being calculated correctly.
 
     //euclidean distance for n featureValues, where n = size of inner vector
     float similarity = 0.0;

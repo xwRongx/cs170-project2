@@ -96,7 +96,7 @@ void printFeatures(const vector<int> features) {
     } else {
         cout << "{ ";
         for (int feature: features) {
-            cout << feature << " ";
+            cout << feature+1 << " ";
         }
         cout << "}";
     }
@@ -126,6 +126,10 @@ vector<int> forwardSelectionAlgorithm(int featureCount) {
              *      -> contains the highest accuracy subset so far +1 feature
              */
             auto featureList = new vector<int>(*setGlobalHighest);
+
+            if(find(featureList->begin(), featureList->end(), j) != featureList->end()) // featureList contains feature j already, skip it, no duplicate features allowed
+                continue;
+
             featureList->push_back(j);
 
             if (memoizedFeatures->find(featureList) == memoizedFeatures->end()) { // The featureList "featureList" does not exist in the mapping "dataset". We haven't mapped it yet.
@@ -133,7 +137,7 @@ vector<int> forwardSelectionAlgorithm(int featureCount) {
                 memoizedFeatures->insert({featureList, a}); // Create a new entry in the map
 
                 // PRINT: a single featureList with its a -----------
-                cout << "\tUsing features ";
+                cout << "\tUsing feature(s) ";
                 printFeatures(*featureList);
                 cout << " accuracy is " << a << "%\n";
                 // ------------------------------------------
@@ -154,7 +158,7 @@ vector<int> forwardSelectionAlgorithm(int featureCount) {
         // -----------------------------------------------------------------------
 
         // Can't climb any further. setLocalHighest has a smaller accuracy AKA All the sets from the operation results have a smaller accuracy.
-        if (memoizedFeatures->at(setLocalHighest) < memoizedFeatures->at(setGlobalHighest)) {
+        if (memoizedFeatures->at(setLocalHighest) <= memoizedFeatures->at(setGlobalHighest)) {
             break;
         }
 
