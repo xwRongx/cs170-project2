@@ -206,10 +206,14 @@ vector<int> backwardsSelectionAlgorithm(int featureCount) {
     // LOOP 1 : Iterate for N number of s
     for (int i = 0; i < featureCount; i++) {
 
-        auto* featureList = new vector<int>(*setGlobalHighest);
-        featureList->erase(remove(featureList->begin(), featureList->end(), i), featureList->end()); // remove one feature
         // LOOP 2 : Iterate for N number of s
-        for (int j = 0; j < featureList->size(); j++) { // INFO: auto keyword - smartly fills in type based on the variable given (in this case s is int)
+        for (int j = 0; j < featureCount; j++) { // INFO: auto keyword - smartly fills in type based on the variable given (in this case s is int)
+            auto* featureList = new vector<int>(*setGlobalHighest);
+
+            if(find(featureList->begin(), featureList->end(), j) == featureList->end()) // skip this iteration since the feature does not exist in the vector so it cant be removed.
+                continue;
+
+            featureList->erase(remove(featureList->begin(), featureList->end(), j), featureList->end()); // remove one feature
 
             if (memoizedFeatures->find(featureList) == memoizedFeatures->end()) { // The featureList "featureList" does not exist in the mapping "dataset". We haven't mapped it yet.
                 float a = validator->evaluationFunction(*featureList, classifier, dataset);
