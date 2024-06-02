@@ -1,14 +1,29 @@
 #include "../headers/Validator.h"
-#include <cstdlib> //for the rand()
-#include <map>
 
 
-// [STUB]
-float Validator::evaluationFunction(vector<float> features, Classifier* classifier, map<Instance*, float>* dataset){
-      //stub function 
-      return  static_cast <float> (rand()) / ( static_cast <float> (RAND_MAX/(100-0))); //return random number betwwen 0 and 100
+float Validator::evaluationFunction(vector<int> features, Classifier *classifier, vector<Instance *> dataset) {
+    if (features.empty())
+        return 0;
+
+    float counter = 0;
+
+
+    for (int i = 0; i < dataset.size(); i++) {
+        vector<Instance *> trainSet(dataset); // Copy dataset to new training set
+        Instance *testInstance = trainSet[i]; // Save the current testing instance
+        trainSet.erase(trainSet.begin() + i); // Remove the testInstance from the training set
+
+        classifier->train(trainSet); // Train off the training set
+
+        float prediction = classifier->test(features, testInstance);
+
+        if (prediction == testInstance->classLabel) counter++;
+    }
+    return 100 * (counter / dataset.size());
 }
 
 Validator::~Validator() = default;
 
 Validator::Validator() = default;
+
+
