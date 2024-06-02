@@ -25,7 +25,7 @@ vector<Instance*> readDataset(const string& filename) {
         exit(1);
     }
     string line;//will hold value
-    auto data = new vector<Instance*>; //creating a vector<float>* pointer
+    vector<Instance*> data; //creating a vector<float>* pointer
     //auto* keyword is used to declare a pointer type implicitly, so vector<vector<float>*>* data <==> auto* data :)
     int numFeatures = 0; // number of featureValues excluding the first column
     int numInstances = 0; //number of instances (total rows)
@@ -48,32 +48,44 @@ vector<Instance*> readDataset(const string& filename) {
         //cout << numInstances << endl;
         //cout << endl;
         numFeatures = row->featureValues.size(); //setting feature count
-        data->push_back(row);//pushing row vector into data == 1 complete instance being pushed into data vector
+        data.push_back(row);//pushing row vector into data == 1 complete instance being pushed into data vector
     }
 
     infile.close(); //closing the file
 
     //Normalizing the data (X – mean(X))/std(x)
-    for (auto* row : *data) { //looping through data rows, auto* row is a single row instance
-        float mean = 0.0; 
-        int n = row->featureValues.size(); //total size of a row i.e 11 for small-test-dataset.txt
-        for(int i = 0; i < n;++i ){ //adding up all values in for single row
-            mean += row->featureValues.at(i);
+    int numberOfInstances = data.size();
+    // j = # of columns | i = # of rows
+
+    for (int j = 0; j < data.front()->featureValues.size(); j++) {// column iterator
+        /*
+         * CALCULATE MEAN
+         */
+        float mean = 0.0;
+        for(int i = 0; i < numberOfInstances; i++){ //adding up all values in for single column
+            mean += data[i]->featureValues.at(j);
         }
-        mean = mean /(n-1); //calculating the mean for row
-        
+        mean = mean / numberOfInstances; //calculating the mean for the column
+
+        /*
+         * CALCULATE STANDARD DEVIATION
+         */
         float stddev = 0.0;
-        for(int i = 0; i < n;++i){ //adding up values for stddev (row-val - mean)^2
-            stddev += pow(row->featureValues.at(i) - mean, 2);
+        for(int i = 0; i < numberOfInstances; i++){ //adding up values for stddev (row-val - mean)^2
+            stddev += pow(data[i]->featureValues.at(j) - mean, 2);
         }
-        stddev = sqrt(stddev / (n-1)); //stddev for row
-        
-        for(int i = 0; i < n;++i){ //X = (X – mean(X))/std(x) putting it all together
-            row->featureValues.at(i) = (row->featureValues.at(i) - mean) / stddev;
+        stddev = sqrt(stddev / numberOfInstances); //stddev for row
+
+        /*
+         * UPDATING ALL THE DATA WITH THEIR NEW VALUES
+         */
+        for (auto* row : data) { //looping through data rows, auto* row is a single row instance
+            row->featureValues.at(j) = (row->featureValues.at(j) - mean) / stddev; //X = (X – mean(X))/std(x) putting it all together
             //cout << fixed << setprecision(8) << row->at(i) << " ";
         }
     }
-    /* 
+
+    /*
     //checking if values were properly updated after normalizing
     for (auto* row : *data){
         for(int i = 0; i < row->size();++i){ //X = (X – mean(X))/std(x)
@@ -81,8 +93,10 @@ vector<Instance*> readDataset(const string& filename) {
         }
         cout << endl;
     }*/
+
+
     cout << "This dataset has " << numFeatures << " featureValues (not including the class attribute), with " << numInstances << " instances." << endl;
-    return *data;
+    return data;
 }
 
 auto validator = new Validator();
@@ -91,6 +105,8 @@ vector<Instance*> dataset;
 
 // Prints a single featureValues
 void printFeatures(const vector<int> features) {
+    // TODO: sort features low to high before printing
+
     if(features.empty()) {
         cout << "{}";
     } else {
@@ -167,63 +183,68 @@ vector<int> forwardSelectionAlgorithm(int featureCount) {
     return *setGlobalHighest;
 };
 
-/*
 vector<int> backwardsSelectionAlgorithm(int featureCount) {
-    auto* rootNode = new Instance();
-    rootNode->featureValues = s;
-    // add root node to dataset
+    // create root node
+    auto rootNode = new vector<int>;
+    for(int k = 0; k < featureCount; k++) {
+        rootNode->push_back(k);
+    }
+
+    // add root node to memoizedFeatures
     memoizedFeatures->insert({
         rootNode,
-        validator->evaluationFunction(rootNode->featureValues, classifier, memoizedFeatures)
+        validator->evaluationFunction(*rootNode, classifier, dataset)
     });
 
     cout << "Root node: ";
-    printFeatures(rootNode->featureValues);
-    cout << ", Accuracy: " << memoizedFeatures->at(rootNode) << "%\n";
+    printFeatures(*rootNode);
+    cout <<   ", Accuracy: " << memoizedFeatures->at(rootNode) << "%\n";
 
-    auto* setGlobalHighest = rootNode;
-    Instance* setLocalHighest = rootNode;
+    auto setGlobalHighest = rootNode;
+    auto setLocalHighest = rootNode;
 
     // LOOP 1 : Iterate for N number of s
     for (int i = 0; i < featureCount; i++) {
 
+        auto* featureList = new vector<int>(*setGlobalHighest);
+        featureList->erase(remove(featureList->begin(), featureList->end(), i), featureList->end()); // remove one feature
         // LOOP 2 : Iterate for N number of s
-        for (int j = 0; j < featureCount; j++) { // INFO: auto keyword - smartly fills in type based on the variable given (in this case s is int)
-            auto* instance = new Instance(*setGlobalHighest);
-            instance->featureValues.erase(remove(instance->featureValues.begin(), instance->featureValues.end(), j), instance->featureValues.end());
+        for (int j = 0; j < featureList->size(); j++) { // INFO: auto keyword - smartly fills in type based on the variable given (in this case s is int)
 
-            if (memoizedFeatures->find(instance) == memoizedFeatures->end()) { // The instance "instance" does not exist in the mapping "dataset". We haven't mapped it yet.
-                float a = validator->evaluationFunction(instance->featureValues, classifier, memoizedFeatures);
-                memoizedFeatures->insert({instance, a}); // Create a new entry in the map
+            if (memoizedFeatures->find(featureList) == memoizedFeatures->end()) { // The featureList "featureList" does not exist in the mapping "dataset". We haven't mapped it yet.
+                float a = validator->evaluationFunction(*featureList, classifier, dataset);
+                memoizedFeatures->insert({featureList, a}); // Create a new entry in the map
 
-                // PRINT: a single instance with its a -----------
-                cout << "\tUsing featureValues ";
-                printFeatures(instance->featureValues);
+                // PRINT: a single featureList with its a -----------
+                cout << "\tUsing feature(s) ";
+                printFeatures(*featureList);
                 cout << " accuracy is " << a << "%\n";
                 // ------------------------------------------
 
+                /*
+                 *  if accuracy of featureList is greater than the current best featureList's accuracy, make that featureList the new highest
+                 */
                 if (a > memoizedFeatures->at(setLocalHighest)) {
-                    setLocalHighest = instance;
+                    setLocalHighest = featureList;
                 }
             }
         }
 
         // PRINT: selection of best set (each "step") in the algorithm -----------
         cout << "Feature set ";
-        printFeatures(setLocalHighest->featureValues);
+        printFeatures(*setLocalHighest);
         cout << " was best, accuracy is " << memoizedFeatures->at(setLocalHighest) << "%\n";
         // -----------------------------------------------------------------------
 
         // Can't climb any further. setLocalHighest has a smaller accuracy AKA All the sets from the operation results have a smaller accuracy.
-        if (memoizedFeatures->at(setLocalHighest) < memoizedFeatures->at(setGlobalHighest)) {
+        if (memoizedFeatures->at(setLocalHighest) <= memoizedFeatures->at(setGlobalHighest)) {
             break;
         }
 
         setGlobalHighest = setLocalHighest; // setLocalHighest has a larger accuracy. update setGlobalHighest.
     }
-    return setGlobalHighest->featureValues;
-};
-*/
+    return *setGlobalHighest;
+}
 
 int main() {
     srand(time(nullptr));
@@ -267,7 +288,7 @@ int main() {
                 break;
 
             case 2: // Backward Elimination
-                //answer = backwardsSelectionAlgorithm(dataset[0].size());
+                answer = backwardsSelectionAlgorithm(dataset[0]->featureValues.size());
 
                 cout << "The overall best feature selection is: ";
                 printFeatures(answer);

@@ -18,7 +18,7 @@ float Validator::evaluationFunction(vector<int> features, Classifier *classifier
 
         if (prediction == testInstance->classLabel) counter++;
     }
-    return counter / dataset.size();
+    return 100 * (counter / dataset.size());
 }
 
 Validator::~Validator() = default;
