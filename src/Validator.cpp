@@ -7,10 +7,11 @@ float Validator::evaluationFunction(vector<int> features, Classifier *classifier
 
     float counter = 0;
 
-    vector<Instance *> trainSet(dataset); // Copy dataset to new training set
-    for (int i = dataset.size() - 1; i > 0; i--) {
+
+    for (int i = 0; i < dataset.size(); i++) {
+        vector<Instance *> trainSet(dataset); // Copy dataset to new training set
         Instance *testInstance = trainSet[i]; // Save the current testing instance
-        trainSet.pop_back(); // Remove the testInstance from the training set
+        trainSet.erase(trainSet.begin() + i); // Remove the testInstance from the training set
 
         classifier->train(trainSet); // Train off the training set
 
